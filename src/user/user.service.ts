@@ -50,6 +50,6 @@ async findAll() : Promise <User[]>{
       if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
-    await this.userRepository.delete(user);
+    await this.userRepository.delete(id);
   }
 }
