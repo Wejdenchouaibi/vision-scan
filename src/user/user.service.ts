@@ -47,6 +47,9 @@ async findAll() : Promise <User[]>{
 
   async remove(id: number): Promise <void>  {
     const user = await this.findOne(id);
+      if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
     await this.userRepository.delete(user);
   }
 }
