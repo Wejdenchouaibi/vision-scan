@@ -1,4 +1,5 @@
-import { IsNotEmpty, IsNumber, IsString, Min,Max, MinLength } from "class-validator";
+import { Type } from "class-transformer";
+import { IsNotEmpty, IsNumber, IsString, Min,Max, MinLength, IsOptional } from "class-validator";
 
 export class CreateScannedObjectDto {
     @IsString()
@@ -10,6 +11,7 @@ export class CreateScannedObjectDto {
     description: string;
     @IsString()
     @IsNotEmpty()
+    @IsOptional()
     imageUrl: string;
     @IsNotEmpty()
     @IsString()
@@ -17,6 +19,7 @@ export class CreateScannedObjectDto {
     @IsNotEmpty()
     @IsString()
     scanDate: Date;
+    @Type(() => Number)
     @IsNumber()
     @IsNotEmpty()
     @Min(0)

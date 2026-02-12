@@ -1,16 +1,28 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Res } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Res, UploadedFile } from '@nestjs/common';
 import { ScannedObjectService } from './scanned-object.service';
 import { CreateScannedObjectDto } from './dto/create-scanned-object.dto';
 import { UpdateScannedObjectDto } from './dto/update-scanned-object.dto';
 import express from 'express';
 import { ScannedObject } from './entities/scanned-object.entity';
+import { extname } from 'path/win32';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { UseInterceptors } from '@nestjs/common';
 @Controller('scanned-object')
 export class ScannedObjectController {
   constructor(private readonly scannedObjectService: ScannedObjectService) {}
 
   @Post()
-  async create(@Body() createScannedObjectDto: CreateScannedObjectDto, @Res() response: express.Response) {
+  @UseInterceptors(FileInterceptor("imageUrl", {
+storage:diskStorage({
+destination: './uploads',
+filename: (req, file, cb) => {
+cb(null , `${new Date().getTime()}${extname(file.originalname)}`)}
+})
+}))
+  async create(@Body() createScannedObjectDto: CreateScannedObjectDto, @Res() response , @UploadedFile() imageUrl) {
     try {
+      createScannedObjectDto.imageUrl= imageUrl ? imageUrl.filename : null;
       const result = await this.scannedObjectService.create(createScannedObjectDto);
       response.status(201).json(result);
     } catch (error) {
