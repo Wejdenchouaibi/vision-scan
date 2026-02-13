@@ -4,23 +4,28 @@ import { UpdateScannedObjectDto } from './dto/update-scanned-object.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ScannedObject } from './entities/scanned-object.entity';
+import { User } from '../user/entities/user.entity';
 
 @Injectable()
 export class ScannedObjectService {
   constructor(
     @InjectRepository(ScannedObject)
     private scannedObjectRepository: Repository<ScannedObject>,
-  ) {}
-  async create(createScannedObjectDto: CreateScannedObjectDto) {
-    const scannedObject = this.scannedObjectRepository.create(createScannedObjectDto);
+  ) { }
+
+  async create(createScannedObjectDto: CreateScannedObjectDto, user: User) {
+    const scannedObject = this.scannedObjectRepository.create({
+      ...createScannedObjectDto,
+      user,
+    });
     return await this.scannedObjectRepository.save(scannedObject);
   }
 
-  async findAll(): Promise<ScannedObject[]> {
-    const scannedObjects = await this.scannedObjectRepository.find();
-    if (scannedObjects.length === 0) {
-      throw new Error('No scanned objects found');
-    }
+  async findAll(user: User): Promise<ScannedObject[]> {
+    const scannedObjects = await this.scannedObjectRepository.find({
+      where: { user: { id: user.id } },
+    });
+    // Return empty array instead of error if no objects found, common pattern
     return scannedObjects;
   }
 

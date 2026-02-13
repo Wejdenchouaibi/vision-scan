@@ -6,27 +6,27 @@ import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 @Injectable()
 export class UserService {
-   constructor(
+  constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-  ) {}
+  ) { }
 
- 
+
   async create(createUserDto: CreateUserDto): Promise<User> {
     const newuser = await this.userRepository.create(createUserDto);
     return await this.userRepository.save(newuser);
   }
 
-  
-async findAll() : Promise <User[]>{
-    const user=await this.userRepository.find()
-    if(user.length==0){
+
+  async findAll(): Promise<User[]> {
+    const user = await this.userRepository.find()
+    if (user.length == 0) {
       throw new NotFoundException("data not found")
     }
     return user
   }
 
-  async findOne(id: number): Promise <User> {
+  async findOne(id: number): Promise<User> {
     const user = await this.userRepository.findOneBy({ id });
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
@@ -34,7 +34,11 @@ async findAll() : Promise <User[]>{
     return user;
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto): Promise <User>  {
+  async findOneByEmail(email: string): Promise<User | null> {
+    return this.userRepository.findOneBy({ email });
+  }
+
+  async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
     const user = await this.userRepository.preload({
       id,
       ...updateUserDto,
@@ -45,9 +49,9 @@ async findAll() : Promise <User[]>{
     return await this.userRepository.save(user);
   }
 
-  async remove(id: number): Promise <void>  {
+  async remove(id: number): Promise<void> {
     const user = await this.findOne(id);
-      if (!user) {
+    if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
     await this.userRepository.delete(id);

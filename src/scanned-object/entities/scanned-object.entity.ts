@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { User } from "../../user/entities/user.entity";
 
 @Entity()
 export class ScannedObject {
@@ -14,7 +15,10 @@ export class ScannedObject {
     category: string;
     @Column()
     scanDate: Date;
-    @Column({type: 'float', nullable: true})
+    @Column({ type: 'decimal', precision: 6, scale: 2, nullable: true })
     confidence: number;
+
+    @ManyToOne(() => User, (user) => user.scannedObjects, { onDelete: 'CASCADE' })
+    user: User;
 
 }
