@@ -21,4 +21,7 @@ export class ScannedObject {
     @ManyToOne(() => User, (user) => user.scannedObjects, { onDelete: 'CASCADE' })
     user: User;
 
+    getDetails(): string {
+        return `Object: ${this.name}, Category: ${this.category}, Confidence: ${this.confidence}%`;
+    }
 }

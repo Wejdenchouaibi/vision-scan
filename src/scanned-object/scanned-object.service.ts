@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateScannedObjectDto } from './dto/create-scanned-object.dto';
 import { UpdateScannedObjectDto } from './dto/update-scanned-object.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -32,7 +32,7 @@ export class ScannedObjectService {
   async findOne(id: number): Promise<ScannedObject> {
     const scannedObject = await this.scannedObjectRepository.findOneBy({ id });
     if (!scannedObject) {
-      throw new Error('Scanned object not found');
+      throw new NotFoundException(`Scanned object with ID ${id} not found`);
     }
     return scannedObject;
   }
@@ -40,16 +40,18 @@ export class ScannedObjectService {
   async update(id: number, updateScannedObjectDto: UpdateScannedObjectDto) {
     const scannedObject = await this.scannedObjectRepository.findOneBy({ id });
     if (!scannedObject) {
-      throw new Error('Scanned object not found');
+      throw new NotFoundException(`Scanned object with ID ${id} not found`);
     }
+    Object.assign(scannedObject, updateScannedObjectDto);
     return await this.scannedObjectRepository.save(scannedObject);
   }
 
   async remove(id: number) {
     const scannedObject = await this.scannedObjectRepository.findOneBy({ id });
     if (!scannedObject) {
-      throw new Error('Scanned object not found');
+      throw new NotFoundException(`Scanned object with ID ${id} not found`);
     }
-    return await this.scannedObjectRepository.delete(scannedObject);
+    return await this.scannedObjectRepository.delete(id);
   }
 }
+

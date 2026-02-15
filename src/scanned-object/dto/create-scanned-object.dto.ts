@@ -1,5 +1,5 @@
 import { Type } from "class-transformer";
-import { IsNotEmpty, IsNumber, IsString, Min,Max, MinLength, IsOptional } from "class-validator";
+import { IsNotEmpty, IsNumber, IsString, Min, Max, MinLength, IsOptional, IsDate } from "class-validator";
 
 export class CreateScannedObjectDto {
     @IsString()
@@ -10,20 +10,20 @@ export class CreateScannedObjectDto {
     @MinLength(10)
     description: string;
     @IsString()
-    @IsNotEmpty()
     @IsOptional()
     imageUrl: string;
     @IsNotEmpty()
     @IsString()
     category: string;
     @IsNotEmpty()
-    @IsString()
+    @Type(() => Date)
+    @IsDate()
     scanDate: Date;
     @Type(() => Number)
     @IsNumber()
     @IsNotEmpty()
     @Min(0)
     @Max(1)
-    confidence:number;
+    confidence: number;
 
 }

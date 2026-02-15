@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Res, UploadedFile, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UploadedFile, UseGuards, Request } from '@nestjs/common';
 import { ScannedObjectService } from './scanned-object.service';
 import { CreateScannedObjectDto } from './dto/create-scanned-object.dto';
 import { UpdateScannedObjectDto } from './dto/update-scanned-object.dto';
@@ -8,7 +8,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { UseInterceptors } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import express from 'express';
+
 
 @Controller('scanned-object')
 @UseGuards(JwtAuthGuard)
@@ -24,39 +24,23 @@ export class ScannedObjectController {
       }
     })
   }))
-  async create(@Body() createScannedObjectDto: CreateScannedObjectDto, @Res() response, @UploadedFile() imageUrl, @Request() req) {
-    try {
-      createScannedObjectDto.imageUrl = imageUrl ? imageUrl.filename : null;
-      const result = await this.scannedObjectService.create(createScannedObjectDto, req.user);
-      response.status(201).json(result);
-    } catch (error) {
-      response.status(500).json({ message: 'Error creating scanned object', error });
-    }
+  async create(@Body() createScannedObjectDto: CreateScannedObjectDto, @UploadedFile() imageUrl, @Request() req) {
+    createScannedObjectDto.imageUrl = imageUrl ? imageUrl.filename : null;
+    return await this.scannedObjectService.create(createScannedObjectDto, req.user);
   }
 
 
   @Get()
-  async findAll(@Res() response: express.Response, @Request() req) {
-    try {
-      const result = await this.scannedObjectService.findAll(req.user);
-      response.status(200).json(result);
-    } catch (error) {
-      response.status(500).json({ message: 'Error fetching scanned objects', error });
-    }
+  async findAll(@Request() req) {
+    return await this.scannedObjectService.findAll(req.user);
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string, @Res() response: express.Response) {
-    try {
-      const result = await this.scannedObjectService.findOne(+id);
-      response.status(200).json(result);
-    } catch (error) {
-      response.status(500).json({ message: 'Error fetching scanned object', error });
-    }
+  async findOne(@Param('id') id: string) {
+    return await this.scannedObjectService.findOne(+id);
   }
 
   @Patch(':id')
-
   @UseInterceptors(FileInterceptor("imageUrl", {
     storage: diskStorage({
       destination: './uploads',
@@ -65,25 +49,15 @@ export class ScannedObjectController {
       }
     })
   }))
-  async update(@Param('id') id: string, @Body() updateScannedObjectDto: UpdateScannedObjectDto, @UploadedFile() imageUrl, @Res() response) {
-    try {
-      if (imageUrl) {
-        updateScannedObjectDto.imageUrl = imageUrl.filename;
-      }
-      const result = await this.scannedObjectService.update(+id, updateScannedObjectDto);
-      response.status(200).json(result);
-    } catch (error) {
-      response.status(500).json({ message: 'Error updating scanned object', error });
+  async update(@Param('id') id: string, @Body() updateScannedObjectDto: UpdateScannedObjectDto, @UploadedFile() imageUrl) {
+    if (imageUrl) {
+      updateScannedObjectDto.imageUrl = imageUrl.filename;
     }
+    return await this.scannedObjectService.update(+id, updateScannedObjectDto);
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string, @Res() response: express.Response) {
-    try {
-      const result = await this.scannedObjectService.remove(+id);
-      response.status(200).json(result);
-    } catch (error) {
-      response.status(500).json({ message: 'Error removing scanned object', error });
-    }
+  async remove(@Param('id') id: string) {
+    return await this.scannedObjectService.remove(+id);
   }
 }
