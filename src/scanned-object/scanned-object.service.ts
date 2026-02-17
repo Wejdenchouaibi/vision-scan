@@ -11,20 +11,27 @@ export class ScannedObjectService {
   constructor(
     @InjectRepository(ScannedObject)
     private scannedObjectRepository: Repository<ScannedObject>,
+          @InjectRepository(User)
+  private userRepository: Repository<User>,
+
   ) { }
 
-  async create(createScannedObjectDto: CreateScannedObjectDto, user: User) {
+  async create(createScannedObjectDto: CreateScannedObjectDto) {
+    const user=await this.userRepository.findOne({where:{id:createScannedObjectDto.user}, relations:['scannedObjects']});
+    if (!user) {
+      throw new NotFoundException(`User with ID ${createScannedObjectDto.user} not found`);
+    }
+
     const scannedObject = this.scannedObjectRepository.create({
       ...createScannedObjectDto,
-      user,
+      user : user
     });
     return await this.scannedObjectRepository.save(scannedObject);
   }
 
   async findAll(user: User): Promise<ScannedObject[]> {
     const scannedObjects = await this.scannedObjectRepository.find({
-      where: { user: { id: user.id } },
-    });
+relations: ['user'],   });
     // Return empty array instead of error if no objects found, common pattern
     return scannedObjects;
   }

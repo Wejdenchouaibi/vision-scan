@@ -16,7 +16,7 @@ export class User {
   @Column()
   password: string;
 
-  @OneToMany(() => ScannedObject, (scannedObject) => scannedObject.user)
+  @OneToMany(() => ScannedObject, (scannedObject) => scannedObject.user , {cascade: true})
   scannedObjects: ScannedObject[];
 
   @BeforeInsert()

@@ -25,5 +25,8 @@ export class CreateScannedObjectDto {
     @Min(0)
     @Max(1)
     confidence: number;
+    @Type(() => Number)
+    @IsNumber()
+    user: number;
 
 }

@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { User } from "../../user/entities/user.entity";
 
 @Entity()
@@ -19,6 +19,7 @@ export class ScannedObject {
     confidence: number;
 
     @ManyToOne(() => User, (user) => user.scannedObjects, { onDelete: 'CASCADE' })
+    @JoinColumn({ name: 'user' })
     user: User;
 
     getDetails(): string {

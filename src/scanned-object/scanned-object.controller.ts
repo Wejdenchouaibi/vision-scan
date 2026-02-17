@@ -11,7 +11,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 
 @Controller('scanned-object')
-@UseGuards(JwtAuthGuard)
+// @UseGuards(JwtAuthGuard)
 export class ScannedObjectController {
   constructor(private readonly scannedObjectService: ScannedObjectService) { }
 
@@ -24,9 +24,9 @@ export class ScannedObjectController {
       }
     })
   }))
-  async create(@Body() createScannedObjectDto: CreateScannedObjectDto, @UploadedFile() imageUrl, @Request() req) {
+  async create(@Body() createScannedObjectDto: CreateScannedObjectDto, @UploadedFile() imageUrl) {
     createScannedObjectDto.imageUrl = imageUrl ? imageUrl.filename : null;
-    return await this.scannedObjectService.create(createScannedObjectDto, req.user);
+    return await this.scannedObjectService.create(createScannedObjectDto);
   }
 
 
