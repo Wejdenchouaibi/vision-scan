@@ -6,9 +6,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserModule } from './user/user.module';
 import { ScannedObjectModule } from './scanned-object/scanned-object.module';
-import { AuthModule } from './auth/auth.module';
 import { User } from './user/entities/user.entity';
 import { ScannedObject } from './scanned-object/entities/scanned-object.entity';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -32,6 +32,7 @@ import { ScannedObject } from './scanned-object/entities/scanned-object.entity';
     UserModule,
     ScannedObjectModule,
     AuthModule,
+    
   ],
   controllers: [AppController],
   providers: [AppService, TypeORMError],

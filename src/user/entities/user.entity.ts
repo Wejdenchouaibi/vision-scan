@@ -18,7 +18,8 @@ export class User {
 
   @OneToMany(() => ScannedObject, (scannedObject) => scannedObject.user , {cascade: true})
   scannedObjects: ScannedObject[];
-
+  @Column({type: 'varchar', nullable: true })
+    refreshToken!: string| null;
   @BeforeInsert()
   @BeforeUpdate()
   async hashPassword() {

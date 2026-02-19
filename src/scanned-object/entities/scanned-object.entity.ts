@@ -22,7 +22,7 @@ export class ScannedObject {
     @JoinColumn({ name: 'user' })
     user: User;
 
-    getDetails(): string {
-        return `Object: ${this.name}, Category: ${this.category}, Confidence: ${this.confidence}%`;
-    }
+    // getDetails(): string {
+    //     return `Object: ${this.name}, Category: ${this.category}, Confidence: ${this.confidence}%`;
+    // }
 }

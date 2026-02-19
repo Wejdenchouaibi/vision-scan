@@ -7,7 +7,6 @@ import { extname } from 'path/win32';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { UseInterceptors } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 
 @Controller('scanned-object')

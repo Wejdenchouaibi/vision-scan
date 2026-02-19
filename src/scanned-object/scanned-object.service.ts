@@ -37,7 +37,7 @@ relations: ['user'],   });
   }
 
   async findOne(id: number): Promise<ScannedObject> {
-    const scannedObject = await this.scannedObjectRepository.findOneBy({ id });
+    const scannedObject = await this.scannedObjectRepository.findOne({ where:{id} , relations: ['user'] });
     if (!scannedObject) {
       throw new NotFoundException(`Scanned object with ID ${id} not found`);
     }
