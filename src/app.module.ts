@@ -32,6 +32,9 @@ import { AuthModule } from './auth/auth.module';
     UserModule,
     ScannedObjectModule,
     AuthModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     
   ],
   controllers: [AppController],

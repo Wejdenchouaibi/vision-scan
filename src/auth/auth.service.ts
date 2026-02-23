@@ -52,5 +52,7 @@ export class AuthService {
   hashData(data: string) {
     return argon2.hash(data);
   }
+
+
 }
 
