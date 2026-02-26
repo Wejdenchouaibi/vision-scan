@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { UserService } from 'src/user/user.service';
@@ -8,6 +8,7 @@ import { AuthDto } from './dto/auth.dto';
 import * as argon2 from 'argon2';
 @Injectable()
 export class AuthService {
+  MailerService: any;
   constructor(private userService: UserService,
     private jwtService: JwtService,
     private configService: ConfigService
@@ -52,9 +53,9 @@ export class AuthService {
   hashData(data: string) {
     return argon2.hash(data);
   }
-async refreshTokens(userId: number, refreshToken: string) {
-    const user= await this.userService.findOne(userId);
-    if (!user|| !user.refreshToken)
+  async refreshTokens(userId: number, refreshToken: string) {
+    const user = await this.userService.findOne(userId);
+    if (!user || !user.refreshToken)
       throw new ForbiddenException('Access Denied');
     const refreshTokenMatches = await argon2.verify(
       user.refreshToken,
@@ -65,5 +66,72 @@ async refreshTokens(userId: number, refreshToken: string) {
     await this.updateRefreshToken(user.id, tokens.refreshToken);
     return tokens;
   }
+  async forgotPassword(email: string) {
+    try {
+      const existing = await this.userService.findOneByEmail(email);
+      if (!existing) {
+        throw new NotFoundException('user not found');
+      } else {
+        const token = await this.jwtService.sign(
+          {
+            id: existing.id,
+          },
+          {
+            secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
+            expiresIn: '10m',
+          },
+        );
+        await this.userService.updateToken(existing.id, token);
+        const options = {
+          to: existing.email,
+          subject: 'forget password',
+          html: `
+  <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
+    
+    <h2 style="color: #2c3e50;">Password Reset Request</h2>
+    
+    <p>Hello ${existing.email},</p>
+    
+    <p>
+      We received a request to reset your password. 
+      If you made this request, please click the button below to set a new password.
+    </p>
+
+    <div style="text-align: center; margin: 30px 0;">
+      <a href="http://localhost:3001/auth/reset/${token}" 
+         style="background-color: #007bff; color: white; padding: 12px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+         Reset My Password
+      </a>
+    </div>
+
+    <p>
+      This link will expire in <strong>10 minutes</strong> for security reasons.
+    </p>
+
+    <p>
+      If you did not request a password reset, please ignore this email.
+      Your password will remain unchanged.
+    </p>
+
+    <hr style="margin: 30px 0;" />
+
+    <p style="font-size: 12px; color: gray;">
+      This is an automated message. Please do not reply to this email.
+    </p>
+
+  </div>
+`,
+        };
+        await this.MailerService.sendMail(options);
+        return {
+          success: true,
+          message: 'You can change password',
+        };
+      }
+    } catch (error) {
+      return 'erreur';
+    }
+  }
+
 }
 

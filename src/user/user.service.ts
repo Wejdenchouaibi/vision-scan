@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 @Injectable()
 export class UserService {
+  
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
@@ -59,5 +60,14 @@ export class UserService {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
     await this.userRepository.delete(id);
+  }
+  async updateToken(id: any, token: string) {
+    const user = await this.userRepository.update(id, {
+      refreshToken: token,
+    });
+    if (user.affected == 0) {
+      throw new NotFoundException('user not found !');
+    }
+    return this.userRepository.findOne({ where: { id } });
   }
 }

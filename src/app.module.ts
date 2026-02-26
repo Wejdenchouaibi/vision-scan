@@ -9,6 +9,7 @@ import { ScannedObjectModule } from './scanned-object/scanned-object.module';
 import { User } from './user/entities/user.entity';
 import { ScannedObject } from './scanned-object/entities/scanned-object.entity';
 import { AuthModule } from './auth/auth.module';
+import { MailerModule } from '@nestjs-modules/mailer';
 
 @Module({
   imports: [
@@ -34,6 +35,23 @@ import { AuthModule } from './auth/auth.module';
     AuthModule,
     ConfigModule.forRoot({
       isGlobal: true,
+    }),
+    MailerModule.forRoot({
+      transport: {
+        host: "smtp.gmail.com",
+        port: 587,
+        secure: false, // Use TLS
+        tls: {
+        rejectUnauthorized: false
+        },
+        auth: {
+          user: "wijdenchouaibi@gmail.com",
+          pass: "dclf nsry nkgv tcwe",
+        },
+      },
+      defaults: {
+        from:"wijdenchouaibi@gmail.com",
+      },
     }),
     
   ],

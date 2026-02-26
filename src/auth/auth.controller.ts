@@ -14,7 +14,6 @@ interface UserPayload {
   sub: number;
   username: string;
 }
-@UseGuards(AccessTokenGuard)
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -31,5 +30,9 @@ signin(@Body() data:AuthDto) {
     const userId= req.user.sub;
     const refreshToken = req.user["refreshToken"];
      return this.authService.refreshTokens(userId, refreshToken);
+  }
+  @Post("/forgetpassword")
+  forgetPassword(@Body() data: AuthDto) {
+    return this.authService.forgotPassword(data.email);
   }
 }
