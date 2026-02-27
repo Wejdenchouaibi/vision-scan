@@ -9,12 +9,14 @@ import {
   HttpStatus,
   Res,
   UseGuards,
+  Put,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import express from 'express';
 import { User } from './entities/user.entity';
+import { updatePasswordDto } from './dto/updatePassword.dto';
 
 @Controller('user')
 export class UserController {
@@ -102,6 +104,21 @@ export class UserController {
         statusCode: 404,
         message: "Erreur lors de la suppression de l'utilisateur : " + error.message,
       });
+    }
+  }
+  @Put('/update-password/:id')
+  async updatePassword(@Body()  UpdatPasswordDto : updatePasswordDto, @Res() res, @Param('id') id: number ){
+    try {
+      const updatedPassword = await this.userService.updatePassword(id, UpdatPasswordDto.oldPassword, UpdatPasswordDto.newPassword) ;
+      return res.status(HttpStatus.OK).json({
+        success: true,
+        message: "password updated"
+      }) ;
+    } catch (error) {
+      return res.status(HttpStatus.BAD_REQUEST).json({
+        success : false,
+        message: "password not updated" + error
+      })
     }
   }
 }

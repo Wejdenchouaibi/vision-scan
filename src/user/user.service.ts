@@ -1,9 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
+import * as argon2 from 'argon2';
 @Injectable()
 export class UserService {
   
@@ -16,6 +17,9 @@ export class UserService {
   async create(createUserDto: CreateUserDto): Promise<User> {
     const newuser = await this.userRepository.create(createUserDto);
     return await this.userRepository.save(newuser);
+  }
+  async saveUser(user: User): Promise<User> {
+    return this.userRepository.save(user);
   }
 
 
@@ -69,5 +73,21 @@ export class UserService {
       throw new NotFoundException('user not found !');
     }
     return this.userRepository.findOne({ where: { id } });
+  }
+  async updatePassword(userId: number, oldPassword: string, newPassword: string) {
+    const user = await this.userRepository.findOneBy({ id: userId });
+    if (!user) {
+      throw new NotFoundException('user not found');
+    }
+    const matching = await argon2.verify(user.password, oldPassword);
+    if (!matching) {
+      throw new BadRequestException('old password is incorrect');
+    }
+    user.password= newPassword;
+    await this.userRepository.save(user);
+    return {
+      success: true,
+      message: 'password updated successfully',
+    };
   }
 }

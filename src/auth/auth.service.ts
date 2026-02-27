@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { UserService } from 'src/user/user.service';
@@ -6,12 +6,13 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { AuthDto } from './dto/auth.dto';
 import * as argon2 from 'argon2';
+import { MailerService } from '@nestjs-modules/mailer';
 @Injectable()
 export class AuthService {
-  MailerService: any;
   constructor(private userService: UserService,
     private jwtService: JwtService,
-    private configService: ConfigService
+    private configService: ConfigService,
+    private  mailerService: MailerService
   ) { }
   async signIn(data: AuthDto) {
     const user = await this.userService.findOneByEmail(data.email);
@@ -122,14 +123,40 @@ export class AuthService {
   </div>
 `,
         };
-        await this.MailerService.sendMail(options);
+        await this.mailerService.sendMail(options);
         return {
           success: true,
           message: 'You can change password',
         };
       }
     } catch (error) {
-      return 'erreur';
+      return 'erreur'+error.message;
+    }
+  }
+  async resetPassword(token: string, password: string) {
+    try {
+      const verifiedToken = await this.jwtService.verify(token, {
+        secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
+      });
+      if (!verifiedToken) {
+        throw new UnauthorizedException('Invalid or expired');
+      } else {
+        const user= await this.userService.findOne(
+          verifiedToken.id,
+        );
+        if (!user) {
+          throw new NotFoundException('User not found');
+        }
+        user.password= password;
+        user.refreshToken = null;
+        await this.userService.saveUser(user);
+        return {
+          success: true,
+          message: 'Password changed successfully',
+        };
+      }
+    } catch (error) {
+      throw new UnauthorizedException(`Unvalid or expired token , ${error}`);
     }
   }
 
